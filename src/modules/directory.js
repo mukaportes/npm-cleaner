@@ -1,50 +1,50 @@
-const fs = require('fs');
+const rimRaf = require('rimraf');
+const folderBlacklist = require('../config/path-blacklist');
+
+const generateRegex = () => {
+  let strRegex = '';
+  const folderBlacklistedKeys = Object.keys(folderBlacklist);
+
+  folderBlacklistedKeys.forEach((folder, index) => {
+    if (index < folderBlacklistedKeys.length - 1) {
+      strRegex += (folderBlacklist[folder] + '|');
+    } else {
+      strRegex += folderBlacklist[folder];
+    }
+
+  });
+
+  return strRegex;
+}
 
 /**
- * Verifies if path is from a file or a directory
+ * Verifies if path is whitelisted
  * @param {string} path Path to be verified
- * @returns {boolean} Condition indicating if the path is from a file or a directory
+ * @returns {boolean} Condition indicating if the path whitelisted or not
  */
-const isDirectory = async (path) => new Promise((resolve, reject) => {
-  fs.stat(path, (error, stats) => {
-    if (error) reject(error);
+const isPathBlacklisted = (path, regexRule) => {
+  const regex = new RegExp(regexRule, 'gi');
 
-    return resolve(stats.isDirectory());
-  });
-});
+  return path.match(regex) !== null;
+};
 
 /**
  * 
  * @param {string} dirPath Path of a directory
  * @returns {Promise} Resolving void if successful and rejects with error if there's any
  */
-const removeFilesFromDir = (dirPath) => new Promise((resolve, reject) => {
-  fs.readdir(dirPath, async (error, files) => {
-    if (error) reject(error);
-
-    for (let i = 0, length = files.length; i < length; i += 1) {
-      const path = `${dirPath}\\${files[i]}`;
-      const isDir = await isDirectory(path);
-
-      if (isDir) {
-        await removeFilesFromDir(path);
-      } else {
-        console.log(`Deleting: ${path}`);
-        fs.unlink(path, (error) => {
-          if (error) reject(error);
-        });
-      }
+const removeDirectory = (dirPath) => new Promise((resolve, reject) => {
+  rimRaf(dirPath, (error) => {
+    if (error) {
+      reject(error);
     }
 
-    fs.rmdir(dirPath, (error) => {
-      if (error) reject(error);
-    });
+    resolve();
   });
-
-  resolve();
 });
 
 module.exports = {
-  isDirectory,
-  removeFilesFromDir,
+  generateRegex,
+  isPathBlacklisted,
+  removeDirectory,
 };
