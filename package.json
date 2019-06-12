@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js --harmony-async-await"
+    "start": "node src/index.js --harmony-async-await --test:123"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/mukaportes/npm-cleaner/issues"
   },
-  "homepage": "https://github.com/mukaportes/npm-cleaner#readme"
+  "homepage": "https://github.com/mukaportes/npm-cleaner#readme",
+  "dependencies": {
+    "rimraf": "^2.6.3"
+  }
 }
