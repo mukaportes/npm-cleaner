@@ -1,20 +1,20 @@
 const fs = require('fs');
-const { isDirectory, removeFilesFromDir } = require('./modules/directory');
+const { isPathBlacklisted, removeDirectory, generateRegex } = require('./modules/directory');
+const { convertStrToWinPath } = require('./modules/path');
 
-const run = (basePath) => new Promise((resolve, reject) => {
-  fs.readdir(basePath, async (error, files) => {
+const run = (rawBasePath) => new Promise((resolve, reject) => {
+  const basePath = convertStrToWinPath(rawBasePath);
+  const regexRule = generateRegex();
+
+  fs.readdir(basePath, async (error, content) => {
     if (error) reject(error);
 
-    for (let i = 0, length = files.length; i < length; i += 1) {
-      const path = `${basePath}\\${files[i]}`;
-      const isDir = await isDirectory(path);
+    for (let i = 0, length = content.length; i < length; i += 1) {
+      const path = `${basePath}\\${content[i]}`;
+      const isWhitelisted = isPathBlacklisted(path, regexRule);
 
-      if (isDir) {
-        removeFilesFromDir(path).catch(error => reject(error));
-      } else {
-        fs.unlink(path, (error) => {
-          if (error) reject(error);
-        });
+      if (isWhitelisted) {
+        await removeDirectory(path);
       }
     }
   });

@@ -1,8 +1,17 @@
+const readline = require('readline');
 const app = require('./app');
 
-// TEMP
-const basePath = 'C:\\sample\\folder';
+const readlineInterface = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-app.run(basePath)
+readlineInterface.question('Enter the folder path: ', (path) => {
+  console.log('Input path: ', path);
+
+  app.run(path)
   .then(() => console.log('Operation successful'))
-  .catch(error => console.error(error));
+  .catch(error => console.error('Opetation failed. Error: ', error));
+  
+  readlineInterface.close();
+});
